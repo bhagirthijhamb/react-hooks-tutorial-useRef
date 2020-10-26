@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Hi } from './Hi';
 import { ApiCall } from './ApiCall';
 import './App.css';
@@ -63,6 +63,42 @@ function App() {
   })
   // lets put this hello reference on the focus button we made earlier.
   // So now when we click focus button, it focuses the email input and logs 'hello' to the console.
+  // *******************************************************************************
+
+  const [name, setName] = useState('');
+  // const [renderCount, setRenderCount] = useState(0);
+  const renderCount = useRef(0); 
+  // useRef returns a single value renderCount
+  // the returned value form useRef hook actually is an object and looks like { current: 0 } (set to 0 because we have passed 0 to useRef)
+  // so renderCount is just an object with current property. When we update current property, that is what gets persisted between different updates
+
+  // so state is not the way to do it. nit useRef is
+  // A ref is very similar to state in that it persits between renders of your components.
+  // DIff is that a ref does not cause you component to update when it gets changed.
+  useEffect(() => {
+    // Would set up an infinite loop because of re-render 
+    // so state is not the way to do it. nit useRef is
+    // setRenderCount(prevRenderCount => prevRenderCount + 1);
+
+    renderCount.current = renderCount.current + 1;
+  })
+  // we can change renderCount.current as many time as we want, it will never ever cause our component to re-render because it is separate from our component render cycle.
+  // it is very similar to state, you can save previous value in it ans it persists between rerenders but it does not cause component to rerender as the state does.
+  // usecase - number of time a component has rendered on the screen
+  // -------------------------------------------------
+
+  // Usecase- - to store the previous value of your state because there is not way to get  the previous value of the state, its just always the value of state.
+  // So we can sso this with useRef
+  // The previous va;ue of state is always stored in the prevName 
+  // This is useful becauwe if you are using state when you want to previous name inside of state variable it would cause your compoennt to re-render again.
+  // With useRef we are not causing that additional re-render that we dont actually need.
+  // So for persisting values across renders without causing a <re-render className=""></re-render>
+
+  const prevName = useRef('');
+
+  useEffect(() => {
+    prevName.current = name;
+  }, [name])
 
   return (
     <div className="App">
@@ -88,6 +124,18 @@ function App() {
       <div style={{color:"blue"}}>ApiCall output</div>
       {showApiCall && <ApiCall />}
       <button onClick={() => setShowApiCall(!showApiCall)}>Toggle ApiCall</button>
+
+      {/* ----------------------------------------------------------------- */}
+      <hr/>
+      <h2 style={{color: "red"}}>useRef</h2>
+      <input type="text" vlaue={name} placeholder="name" onChange={(e) => setName(e.target.value)}/>
+      <div>My name is {name}</div>
+      <div>-------------------------</div>
+      {/* <div>I rendered {renderCount} times</div> */}
+      <div>I rendered {renderCount.current} times</div>
+      <div>-------------------------</div>
+      
+      <div>My name is {name} and it used to be {prevName.current}</div>
 
     </div>
   );
